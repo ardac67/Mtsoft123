@@ -16,13 +16,16 @@ namespace Mtsoft123
          
 
         }
+        
         DataTableCollection tableCollection;
+        /*ürün listesi*/
         List<Products> products = new List<Products>();
         string connectionstring = ConfigurationManager.ConnectionStrings["Connectionstring"].ConnectionString;
         private void button1_Click(object sender, EventArgs e)
         {
             try
             {
+                /*excelin açılması*/
                 using (OpenFileDialog ofd = new OpenFileDialog())
                 {
                     if (ofd.ShowDialog() == DialogResult.OK)
@@ -63,7 +66,7 @@ namespace Mtsoft123
 
                 if (dt != null)
                 {
-                    
+                    /*excel verilerinin okunması ve products listesine yazımı*/
                     for (int i = 0; i < dt.Rows.Count; i++)
                     {
                         Products products1 = new Products();
@@ -103,7 +106,8 @@ namespace Mtsoft123
         {
             try
             {
-
+                /*süreli olan kütüphane*/
+                /*ztPriceListTable tablosuna bulk insert atıyor*/
                 DapperPlusManager.Entity<Products>().Table("ztPriceListTable");
                 List<Products> products = productsBindingSource.DataSource as List<Products>;
                 if (products != null)
@@ -117,7 +121,7 @@ namespace Mtsoft123
                 SqlConnection cnn = new SqlConnection(connectionstring);
 
                 cnn.Open();
-
+                /*fiyat spsi çalıştırılıyor , fiyat listesi tablolarına yazabilmek için*/
                 SqlCommand motorrr = new SqlCommand("sp_mtPriceListINSERT",cnn);
 
                 motorrr.Parameters.Add("@User", SqlDbType.NVarChar).Value = textBox2.Text;
@@ -138,7 +142,7 @@ namespace Mtsoft123
             catch (SqlException ex)
             {   
                 if(ex.Number==547 || ex.Number==2627)
-                {
+                {   /*bazı personel hataları içi kontrol konuldu*/
                     MessageBox.Show("Hatalı ürünler var");
                     ErrorReport();
                 }
@@ -148,15 +152,16 @@ namespace Mtsoft123
         private void ErrorReport()
         {
             try
-            {
+            {   
+                /*hata dosyasını oluşturuyor*/
                 string path = AppDomain.CurrentDomain.BaseDirectory + "\\HatalıKayıtlar";
                 string str = AppDomain.CurrentDomain.BaseDirectory + "\\HatalıKayıtlar\\Hata Raporu_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".txt";
                 foreach (Products product in products)
                 {
-                   ErrorControl(product.ProductCode, path, str);
-                   IterationError(product.ProductCode, path, str);
+                   ErrorControl(product.ProductCode, path, str);/*sql hataları kontrolü*/
+                   IterationError(product.ProductCode, path, str);/*tekrar hataları kontrolü*/
                 }
-                OpenErrorFile(str);
+                OpenErrorFile(str);/*hataların yazıldığı text dosyasının açılması*/
             }
             catch (Exception ex)
             {
@@ -176,7 +181,7 @@ namespace Mtsoft123
                 using (SqlDataReader sqlDataReader = sqlCommand.ExecuteReader())
                 {
                     if (!sqlDataReader.HasRows)
-                        WriteToFile(ProductCode, "Ürün kartı açılmamış!!", filepath, path);
+                        WriteToFile(ProductCode, "Ürün kartı açılmamış!!", filepath, path);/*hatanın text dosyaya yazımı*/
                 }
                 connection.Close();
             }
